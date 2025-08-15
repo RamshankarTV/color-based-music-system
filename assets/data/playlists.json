@@ -1,0 +1,44 @@
+{
+    "low": [
+        {
+            "title": "Sad Music 1",
+            "url": "music/sad_1.mp3"
+        },
+        {
+            "title": "Sad Music 2",
+            "url": "music/sad_2.mp3"
+        },
+        {
+            "title": "Sad Music 3",
+            "url": "music/sad_1.mp3"
+        }
+    ],
+    "medium": [
+        {
+            "title": "Relaxing Music 1",
+            "url": "music/relax_1.mp3"
+        },
+        {
+            "title": "Relaxing Music 2",
+            "url": "music/relax_2.mp3"
+        },
+        {
+            "title": "Relaxing Music 3",
+            "url": "music/relax_1.mp3"
+        }
+    ],
+    "high": [
+        {
+            "title": "Upbeat Music 1",
+            "url": "music/upbeat_1.mp3"
+        },
+        {
+            "title": "Upbeat Music 2",
+            "url": "music/upbeat_2.mp3"
+        },
+        {
+            "title": "Upbeat Music 3",
+            "url": "music/upbeat_2.mp3"
+        }
+    ]
+}
