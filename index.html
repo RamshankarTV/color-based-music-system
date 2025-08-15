@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color-based Music Recommendation</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        /* Center the main content */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default margin */
+            background-color: #f9f9f9; /* Light background color */
+        }
+
+        /* Optional styling for the image container */
+        #uploadedImageContainer {
+            width: 150px; /* Set the width of the box */
+            height: 150px; /* Set the height of the box */
+            overflow: hidden; /* Hide overflow */
+            border: 1px solid #ccc; /* Add a border */
+            margin: 10px 0; /* Add some margin */
+            display: flex; /* Center the image */
+            align-items: center; /* Center vertically */
+            justify-content: center; /* Center horizontally */
+            background-color: #fff; /* Background color for the container */
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload an Image to Get a Music Playlist</h1>
+    <input type="file" id="imageUpload" accept="image/*">
+    <div id="colorInfo"></div>
+    <div id="uploadedImageContainer"></div> <!-- Container for the uploaded image -->
+    <div id="playlist"></div>
+
+    <!-- Include Color Thief Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.2/color-thief.umd.js"></script>
+    <script>
+        document.getElementById('imageUpload').addEventListener('change', handleImageUpload);
+
+        let playlists = {};
+
+        async function loadPlaylists() {
+            try {
+                const response = await fetch('playlists.json');
+                playlists = await response.json();
+            } catch (error) {
+                console.error('Error loading playlists:', error);
+            }
+        }
+
+        loadPlaylists();
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const img = new Image();
+                img.src = URL.createObjectURL(file);
+                img.onload = () => {
+                    const colorThief = new ColorThief();
+                    const dominantColor = colorThief.getColor(img);
+                    setBackgroundColor(dominantColor);
+                    displayColorInfo(dominantColor);
+                    recommendMusic(dominantColor);
+                };
+
+                // Display the uploaded image in a small box
+                displayUploadedImage(img);
+            }
+        }
+
+        function setBackgroundColor(color) {
+            document.body.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        }
+
+        function displayColorInfo(color) {
+            document.getElementById('colorInfo').innerHTML = `Dominant Color: rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        }
+
+        function recommendMusic(color) {
+            let playlistType = '';
+
+            // Determine playlist type based on color intensity
+            const brightness = (color[0] + color[1] + color[2]) / 3;
+
+            if (brightness < 85) { // Dull and gloomy
+                playlistType = 'low';
+            } else if (brightness >= 85 && brightness <= 170) { // Light colors
+                playlistType = 'medium';
+            } else { // Bright and vibrant
+                playlistType = 'high';
+            }
+
+            let selectedPlaylist = playlists[playlistType];
+
+            // Shuffle the selected playlist using Fisher-Yates Shuffle Algorithm
+            selectedPlaylist = fisherYatesShuffle(selectedPlaylist);
+
+            displayPlaylist(selectedPlaylist);
+        }
+
+        function displayUploadedImage(img) {
+            const imageContainer = document.getElementById('uploadedImageContainer');
+            imageContainer.innerHTML = ''; // Clear previous image
+
+            img.style.maxWidth = '100%'; // Make the image responsive
+            img.style.maxHeight = '100%'; // Make the image responsive
+            imageContainer.appendChild(img); // Append the new image
+        }
+
+        function displayPlaylist(playlist) {
+            const playlistContainer = document.getElementById('playlist');
+            playlistContainer.innerHTML = '';
+
+            playlist.forEach(song => {
+                const audioElement = document.createElement('audio');
+                audioElement.setAttribute('controls', '');
+                audioElement.setAttribute('class', 'audio-player');
+
+                const sourceElement = document.createElement('source');
+                sourceElement.setAttribute('src', song.url);
+                sourceElement.setAttribute('type', 'audio/mp3');
+
+                audioElement.appendChild(sourceElement);
+                playlistContainer.appendChild(audioElement);
+
+                const titleElement = document.createElement('p');
+                titleElement.textContent = song.title;
+                playlistContainer.appendChild(titleElement);
+            });
+        }
+
+        // Fisher-Yates Shuffle Algorithm
+        function fisherYatesShuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
